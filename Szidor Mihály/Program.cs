@@ -90,13 +90,18 @@ namespace Project_feladat
         {
 
             string mentes_helye = AppDomain.CurrentDomain.BaseDirectory;
-            mentes_helye += @"palyak\";
+            mentes_helye += "palyak\\";
             var txtFiles = Directory.EnumerateFiles(mentes_helye, "*.txt");
             string[] palyak = new string[txtFiles.Count()];
             int palyaIndex = 0;
+            if (txtFiles.Count() == 0)
+            {
+                Console.WriteLine($"\n\n\n\n\nNincsen mentett pálya a következő útvonalon:\n{mentes_helye}");
+            }
+
             foreach (string file in txtFiles)
             {
-                string nev = file.Split(@"\")[file.Split(@"\").Count()-1];
+                string nev = file.Split("\\")[file.Split("\\").Count()-1];
                 nev = nev.Split(".txt")[0];
                 palyak[palyaIndex] = nev;
                 palyaIndex++;
@@ -141,7 +146,7 @@ namespace Project_feladat
 
 
 
-            string[] sorok = System.IO.File.ReadAllLines(@$"{mentes_helye + palyak[valasztottPalya] + ".txt"}");
+            string[] sorok = System.IO.File.ReadAllLines($"{mentes_helye + palyak[valasztottPalya] + ".txt"}");
             int SOR = sorok.Length;
             int OSZLOP = sorok[0].Length;
             char[,] map = new char[SOR, OSZLOP];
@@ -157,11 +162,11 @@ namespace Project_feladat
 
         static List<List<int>> Bejarat(int SOR, int OSZLOP, char[,] terkep)
         {
-            List<char> sorBejaratFent = new() { '║', '╠', '╣', '╬', '╩', '╚', '╝' };
-            List<char> sorBejaratLent = new() { '║', '╠', '╣', '╬', '╔', '╗', '╦' };
-            List<char> oszlopBejaratBalra = new() { '═', '╣', '╬', '╝', '╩', '╗', '╦' };
-            List<char> oszlopBejaratJobbra = new() { '═', '╬', '╩', '╦', '╔', '╚', '╠' };
-            List<List<int>> bejarat = new();
+            List<char> sorBejaratFent = new List<char> { '║', '╠', '╣', '╬', '╩', '╚', '╝' };
+            List<char> sorBejaratLent = new List<char> { '║', '╠', '╣', '╬', '╔', '╗', '╦' };
+            List<char> oszlopBejaratBalra = new List<char> { '═', '╣', '╬', '╝', '╩', '╗', '╦' };
+            List<char> oszlopBejaratJobbra = new List<char> { '═', '╬', '╩', '╦', '╔', '╚', '╠' };
+            List<List<int>> bejarat = new List<List<int>>();
             for (int sorIndex = 0; sorIndex < SOR; sorIndex++)
             {
                 for (int oszlopIndex = 0; oszlopIndex < OSZLOP; oszlopIndex++)
@@ -179,7 +184,7 @@ namespace Project_feladat
         {
             int SOR = terkep.GetLength(0);
             int OSZLOP = terkep.GetLength(1);
-            List<List<int>> kincs = new();
+            List<List<int>> kincs = new List<List<int>>();
 
             for (int sorIndex = 0; sorIndex < SOR; sorIndex++)
             {
@@ -197,11 +202,11 @@ namespace Project_feladat
         static void KarakterMozgas(char[,] terkep, Dictionary<char, List<string>> mozgasIranyok, bool[] beallitasok)
         {
             List<List<int>> bejarat = Bejarat(terkep.GetLength(0), terkep.GetLength(1), terkep);
-            List<int> karakter = new() { bejarat[1][0], bejarat[1][1] };
+            List<int> karakter = new List<int>() { bejarat[1][0], bejarat[1][1] };
             int lepesekSzama = 0;
             bool isJatek = true;
             List<List<int>> kincs = KincsesTerem(terkep);
-            List<List<int>> megtalaltKincsek = new();
+            List<List<int>> megtalaltKincsek = new List<List<int>>();
             char[,] bejartUt = new char[terkep.GetLength(0), terkep.GetLength(1)];
             while (isJatek)
             {
@@ -399,7 +404,7 @@ namespace Project_feladat
         public static async Task Mentes(string adatok)
         {
             string mentesHelye = AppDomain.CurrentDomain.BaseDirectory;
-            mentesHelye += @"mentes\mentes.SAV";
+            mentesHelye += "mentes\\mentes.SAV";
             if (!File.Exists(mentesHelye))
             {
                 File.Create(mentesHelye);
@@ -462,7 +467,7 @@ namespace Project_feladat
 
         static void Jatek(bool[] beallitasok)
         {
-            Dictionary<char, List<string>> mozgasIranyok = new()
+            Dictionary<char, List<string>> mozgasIranyok = new Dictionary<char, List<string>> ()
             {
                 { '║', new List<string> { "fel", "le" } },
                 { '╠', new List<string> { "fel", "le", "jobbra" } },
@@ -508,7 +513,7 @@ namespace Project_feladat
 
         static bool MentesEllenorzese()
         {
-            string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + @"\mentes";
+            string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "\\mentes";
             bool vanMentes = File.Exists(mentesHelye);
             return vanMentes;
         }
