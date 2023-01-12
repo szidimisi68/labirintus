@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labirintus_Palyaszerkeszto", "Labirintus_Palyaszerkeszto\Labirintus_Palyaszerkeszto.csproj", "{515F45C9-AF3E-4ABE-B2B3-699A4D35717A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{515F45C9-AF3E-4ABE-B2B3-699A4D35717A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{515F45C9-AF3E-4ABE-B2B3-699A4D35717A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{515F45C9-AF3E-4ABE-B2B3-699A4D35717A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{515F45C9-AF3E-4ABE-B2B3-699A4D35717A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6122FE25-E90F-41CC-85DD-EF2A7CA98017}
+	EndGlobalSection
+EndGlobal
