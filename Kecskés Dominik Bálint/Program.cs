@@ -202,7 +202,7 @@ namespace Labirintus_Palyaszerk
                             {
                                 if (valasztott > 0)
                                 {
-                                    Console.SetCursorPosition(0, valasztott+2);
+                                    Console.SetCursorPosition(0, valasztott + 2);
                                     Console.Write(opc[valasztott]);
                                     valasztott--;
                                 }
@@ -211,7 +211,7 @@ namespace Labirintus_Palyaszerk
                             {
                                 if (valasztott < opc.Length - 1)
                                 {
-                                    Console.SetCursorPosition(0, valasztott+2);
+                                    Console.SetCursorPosition(0, valasztott + 2);
                                     Console.Write(opc[valasztott]);
                                     valasztott++;
                                 }
@@ -234,13 +234,14 @@ namespace Labirintus_Palyaszerk
                                 }
                                 ad = false;
                             }
-                            Console.SetCursorPosition(0, valasztott+2);
+                            Console.SetCursorPosition(0, valasztott + 2);
                             Console.BackgroundColor = ConsoleColor.White;
                             Console.ForegroundColor = ConsoleColor.Black;
                             Console.Write(opc[valasztott]);
                             Console.ResetColor();
                         }
-                    } else
+                    }
+                    else
                     {
                         lehetHasznalniOpciokat = false;
                         Menu();
@@ -251,14 +252,14 @@ namespace Labirintus_Palyaszerk
 
         static bool[] PalyaMentes(char[,] palya, bool kilep = false)
         {
-            bool[] toReturn = new bool[2] {kilep, false};
+            bool[] toReturn = new bool[2] { kilep, false };
             string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "mentes";
             if (!Directory.Exists(mentesHelye))
             {
                 Directory.CreateDirectory(mentesHelye);
             }
             Random rand = new Random();
-            mentesHelye += $"\\{Directory.GetFiles(mentesHelye).Length+1}.txt";
+            mentesHelye += $"\\{Directory.GetFiles(mentesHelye).Length + 1}.txt";
             StreamWriter fajlbaIras = new StreamWriter(mentesHelye, false, Encoding.UTF8);
             string formazottSzoveg = "";
             for (int i = 0; i < palya.GetLength(0); i++)
@@ -278,7 +279,7 @@ namespace Labirintus_Palyaszerk
         static char[,] Palyabetoltes()
         {
             string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "mentes";
-            char[,] palya = new char[0,0];
+            char[,] palya = new char[0, 0];
             string valasztottFajl = "";
             if (Directory.Exists(mentesHelye))
             {
@@ -292,7 +293,7 @@ namespace Labirintus_Palyaszerk
                 while (true)
                 {
                     ConsoleKey bevitel = Console.ReadKey(true).Key;
-                    
+
                     if (bevitel.ToString().ToLower() == "w" || bevitel.ToString().ToLower() == "a")
                     {
                         if (valasztott > 0)
@@ -301,10 +302,10 @@ namespace Labirintus_Palyaszerk
                             Console.Write(Path.GetFileName(fajlok[valasztott]));
                             valasztott--;
                         }
-                    } 
+                    }
                     else if (bevitel.ToString().ToLower() == "s" || bevitel.ToString().ToLower() == "d")
                     {
-                        if (valasztott < fajlok.Length-1)
+                        if (valasztott < fajlok.Length - 1)
                         {
                             Console.SetCursorPosition(0, valasztott);
                             Console.Write(Path.GetFileName(fajlok[valasztott]));
@@ -323,27 +324,37 @@ namespace Labirintus_Palyaszerk
                     Console.Write(Path.GetFileName(fajlok[valasztott]));
                     Console.ResetColor();
                 }
-            }
-            
-            
-            string[] formazott = System.IO.File.ReadAllText(valasztottFajl).Split(new char[] { '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
-            int[] meret = { 0, 0 };
-            for (int i = 0; i < formazott.Length; i++)
-            {
-                for (int j = 0; j < formazott[i].Length; j++)
+                string[] formazott = System.IO.File.ReadAllText(valasztottFajl).Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                int[] meret = { 0, 0 };
+                for (int i = 0; i < formazott.Length; i++)
                 {
-                    meret[1]++;
+                    for (int j = 0; j < formazott[i].Length; j++)
+                    {
+                        meret[1]++;
+                    }
+                    meret[0]++;
                 }
-                meret[0]++;
-            }
-            meret[1] /= meret[0];
-            palya = new char[meret[0], meret[1]];
-            for (int i = 0; i < formazott.Length; i++)
-            {
-                for (int j = 0; j < formazott[i].Length; j++)
+                meret[1] /= meret[0];
+                palya = new char[meret[0], meret[1]];
+                for (int i = 0; i < formazott.Length; i++)
                 {
-                    palya[i, j] = formazott[i][j];
+                    for (int j = 0; j < formazott[i].Length; j++)
+                    {
+                        palya[i, j] = formazott[i][j];
+                    }
                 }
+            }
+            else
+            {
+                palya = new char[15, 80];
+                for (int i = 0; i < palya.GetLength(0); i++)
+                {
+                    for (int j = 0; j < palya.GetLength(1); j++)
+                    {
+                        palya[i, j] = GlobalVariables.characters["Fill"];
+                    }
+                }
+                
             }
             return palya;
         }
@@ -369,7 +380,7 @@ namespace Labirintus_Palyaszerk
             {
                 Menu();
             }
-            
+
 
         }
 
