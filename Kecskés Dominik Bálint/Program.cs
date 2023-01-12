@@ -354,7 +354,7 @@ namespace Labirintus_Palyaszerk
                         palya[i, j] = GlobalVariables.characters["Fill"];
                     }
                 }
-                
+                PalyaMentes(palya);
             }
             return palya;
         }
