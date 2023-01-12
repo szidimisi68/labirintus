@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Text;
 
@@ -35,12 +35,6 @@ namespace Labirintus_Palyaszerk
                 }
                 Console.WriteLine();
             }
-        }
-
-        static bool IsMapCorrect(char[,] map)
-        {
-            bool toReturn = false;
-            return toReturn;
         }
 
         static char[,] Palyakeszites()
@@ -184,7 +178,7 @@ namespace Labirintus_Palyaszerk
                 }
                 else if (bevitel == "k")
                 {
-                    if(!mentett)
+                    if (!mentett)
                     {
                         lehetHasznalniOpciokat = false;
                         Console.Clear();
@@ -235,7 +229,7 @@ namespace Labirintus_Palyaszerk
                                 }
                                 else if (valasztott == 2)
                                 {
-                                    PalyaMentes(palya, true);
+                                    PalyaMentes(palya);
                                     Menu();
                                 }
                                 ad = false;
@@ -246,6 +240,10 @@ namespace Labirintus_Palyaszerk
                             Console.Write(opc[valasztott]);
                             Console.ResetColor();
                         }
+                    } else
+                    {
+                        lehetHasznalniOpciokat = false;
+                        Menu();
                     }
                 }
             }
