@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Linq;
+using System.Diagnostics.Tracing;
 using System.IO;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace Project_feladat
 {
@@ -37,10 +39,47 @@ namespace Project_feladat
             Console.BackgroundColor = ConsoleColor.Black;
         }
 
-        static void MegjelenitJatek(int sor, int oszlop, char[,] map)
+        static void MegjelenitVakterkep(int sor, int oszlop, char[,] terkep, string[] beallitasok)
         {
-            List<List<int>> bejarat = Bejarat(map.GetLength(0), map.GetLength(1), map);
+            List<int> karakter = new List<int>() {{0}, {0}};
+            karakter[0] = Convert.ToInt32(beallitasok[1].Split(',')[0]);
+            karakter[1] = Convert.ToInt32(beallitasok[1].Split(',')[1]);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.BackgroundColor = ConsoleColor.DarkGray;
+
+            foreach (string ertekPar in beallitasok[3].Remove(beallitasok[3].Count()-1).Split(','))
+            {
+                int[] tempPar = new int[2];
+                tempPar[0] = Convert.ToInt32(ertekPar.Split(':')[0]);
+                tempPar[1] = Convert.ToInt32(ertekPar.Split(':')[1]);
+
+                if (tempPar[0] == karakter[0] && tempPar[1] == karakter[1])
+                {
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.SetCursorPosition(5 + tempPar[1], 11 + tempPar[0]);
+                    Console.Write(terkep[tempPar[0], tempPar[1]]);
+                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                }
+                else
+                {
+                    Console.SetCursorPosition(5 + tempPar[1], 11 + tempPar[0]);
+                    Console.Write(terkep[tempPar[0], tempPar[1]]);
+                }
+            }
+            
+        }
+
+        static void MegjelenitJatek(int sor, int oszlop, char[,] terkep, string[] beallitasok)
+        {
+            List<List<int>> bejarat = Bejarat(terkep.GetLength(0), terkep.GetLength(1), terkep);
             List<int> karakter = bejarat[1];
+            if (beallitasok.Length > 3)
+            {
+                karakter[0] = Convert.ToInt32(beallitasok[1].Split(',')[0]);
+                karakter[1] = Convert.ToInt32(beallitasok[1].Split(',')[1]);
+            }
+
             const int TABULATOR = 5;
             const int MAGASSAG = 11;
             for (int uressorok = 0; uressorok < MAGASSAG; uressorok++)
@@ -48,13 +87,13 @@ namespace Project_feladat
                 Console.WriteLine();
             }
             Console.Write(new String(' ', TABULATOR));
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.BackgroundColor = ConsoleColor.Gray;
-            for (int sorIndex = 0; sorIndex < sor; sorIndex++)  // todo  playert irányítani
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.BackgroundColor = ConsoleColor.DarkGray;
+            for (int sorIndex = 0; sorIndex < sor; sorIndex++)
             {
                 for (int oszlopIndex = 0; oszlopIndex < oszlop; oszlopIndex++)
                 {
-                    if (map[sorIndex, oszlopIndex] == '.')
+                    if (terkep[sorIndex, oszlopIndex] == '.')
                     {
                         Console.Write(' ');
                     }
@@ -63,13 +102,14 @@ namespace Project_feladat
                     {
                         if (sorIndex == karakter[0] && oszlopIndex == karakter[1])
                         {
-                            Console.BackgroundColor = ConsoleColor.Green;
-                            Console.Write(map[sorIndex, oszlopIndex]);
-                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.BackgroundColor = ConsoleColor.Red;
+                            Console.Write(terkep[sorIndex, oszlopIndex]);
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
                         }
+
                         else
                         {
-                            Console.Write(map[sorIndex, oszlopIndex]);
+                            Console.Write(terkep[sorIndex, oszlopIndex]);
                         }
                     }
                 }
@@ -77,85 +117,105 @@ namespace Project_feladat
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.Write(". \n");
                 Console.Write(" ".PadLeft(TABULATOR));
-                Console.BackgroundColor = ConsoleColor.Gray;
-                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.BackgroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = ConsoleColor.Green;
             }
             Console.BackgroundColor = ConsoleColor.Black;
 
         }
 
-        static char[,] Beolvas()
+        static char[,] Beolvas(string[] beallitasok)
         {
-
-            string mentes_helye = AppDomain.CurrentDomain.BaseDirectory;
-            mentes_helye += "palyak\\";
-            var txtFiles = Directory.EnumerateFiles(mentes_helye, "*.txt");
-            string[] palyak = new string[txtFiles.Count()];
-            int palyaIndex = 0;
-            if (txtFiles.Count() == 0)
+            if (beallitasok.Count() < 4)
             {
-                Console.WriteLine($"\n\n\n\n\nNincsen mentett pálya a következő útvonalon:\n{mentes_helye}");
-            }
-
-            foreach (string file in txtFiles)
-            {
-                string nev = file.Split('\\')[file.Split('\\').Count() - 1];
-                nev = nev.Split('.')[0];
-                palyak[palyaIndex] = nev;
-                palyaIndex++;
-            }
-            int valasztottPalya = 0;
-            char bekeresPalya = ' ';
-
-            while (bekeresPalya != 'e' && bekeresPalya != '\r')
-            {
-                Console.SetCursorPosition(4, 1);
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("LABIRINTUS");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.SetCursorPosition(1, 4);
-                Console.WriteLine("Elérhető pályák:\n");
-
-                for (int gombIndex = 0; gombIndex < palyak.Length; gombIndex++)
+                string mentes_helye = AppDomain.CurrentDomain.BaseDirectory;
+                mentes_helye += "palyak";
+                if (!Directory.Exists(mentes_helye))
                 {
-                    if (gombIndex == valasztottPalya)
+                    Directory.CreateDirectory(mentes_helye);
+                }
+                mentes_helye += "\\";
+                var txtFiles = Directory.EnumerateFiles(mentes_helye, "*.txt");
+                string[] palyak = new string[txtFiles.Count()];
+                int palyaIndex = 0;
+                if (txtFiles.Count() == 0)
+                {
+                    Console.WriteLine($"\n\n\n\n\nNincsen mentett pálya a következő útvonalon:\n{mentes_helye}");
+                }
+
+                foreach (string file in txtFiles)
+                {
+                    string nev = file.Split('\\')[file.Split('\\').Count() - 1];
+                    nev = nev.Split('.')[0];
+                    palyak[palyaIndex] = nev;
+                    palyaIndex++;
+                }
+                int valasztottPalya = 0;
+                char bekeresPalya = ' ';
+
+                while (bekeresPalya != 'e' && bekeresPalya != '\r')
+                {
+                    Console.SetCursorPosition(4, 1);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("LABIRINTUS");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.SetCursorPosition(1, 4);
+                    Console.WriteLine("Elérhető pályák:\n");
+
+                    for (int gombIndex = 0; gombIndex < palyak.Length; gombIndex++)
                     {
-                        Console.SetCursorPosition(1, 6 + gombIndex * 2);
-                        Console.WriteLine($"--> {palyak[gombIndex]} <--\n");
+                        if (gombIndex == valasztottPalya)
+                        {
+                            Console.SetCursorPosition(1, 6 + gombIndex * 2);
+                            Console.WriteLine($"--> {palyak[gombIndex]} <--\n");
+                        }
+                        else
+                        {
+                            Console.SetCursorPosition(4, 6 + gombIndex * 2);
+                            Console.WriteLine(palyak[gombIndex]);
+                        }
                     }
-                    else
+                    bekeresPalya = char.ToLower(Console.ReadKey(true).KeyChar);
+                    if (bekeresPalya == 's' && valasztottPalya < palyak.Count() - 1)
                     {
-                        Console.SetCursorPosition(4, 6 + gombIndex * 2);
-                        Console.WriteLine(palyak[gombIndex]);
+                        valasztottPalya++;
+                    }
+                    else if (bekeresPalya == 'w' && valasztottPalya > 0)
+                    {
+                        valasztottPalya--;
+                    }
+                    Console.Clear();
+                }
+
+                string[] sorok = System.IO.File.ReadAllLines($"{mentes_helye + palyak[valasztottPalya] + ".txt"}");
+                int SOR = sorok.Length;
+                int OSZLOP = sorok[0].Length;
+                char[,] terkep = new char[SOR, OSZLOP];
+                for (int sorIndex = 0; sorIndex < SOR; sorIndex++)
+                {
+                    for (int oszlopIndex = 0; oszlopIndex < OSZLOP; oszlopIndex++)
+                    {
+                        terkep[sorIndex, oszlopIndex] = sorok[sorIndex][oszlopIndex];
                     }
                 }
-                bekeresPalya = char.ToLower(Console.ReadKey(true).KeyChar);
-                if (bekeresPalya == 's' && valasztottPalya < palyak.Count() - 1)
-                {
-                    valasztottPalya++;
-                }
-                else if (bekeresPalya == 'w' && valasztottPalya > 0)
-                {
-                    valasztottPalya--;
-                }
-                Console.Clear();
+                return terkep;
             }
-
-
-
-
-            string[] sorok = System.IO.File.ReadAllLines($"{mentes_helye + palyak[valasztottPalya] + ".txt"}");
-            int SOR = sorok.Length;
-            int OSZLOP = sorok[0].Length;
-            char[,] map = new char[SOR, OSZLOP];
-            for (int sorIndex = 0; sorIndex < SOR; sorIndex++)
+            else
             {
-                for (int oszlopIndex = 0; oszlopIndex < OSZLOP; oszlopIndex++)
+                int SOR = beallitasok[0].Split('\n').Count() - 1;
+                int OSZLOP = beallitasok[0].Split('\n')[0].Count();
+                char[,] terkep = new char[SOR, OSZLOP];
+
+                for (int sorIndex = 0; sorIndex < SOR; sorIndex++)
                 {
-                    map[sorIndex, oszlopIndex] = sorok[sorIndex][oszlopIndex];
+                    for (int oszlopIndex = 0; oszlopIndex < OSZLOP; oszlopIndex++)
+                    {
+                        terkep[sorIndex, oszlopIndex] = beallitasok[0].Split('\n')[sorIndex][oszlopIndex];
+                    }
                 }
+
+                return terkep;
             }
-            return map;
         }
 
         static List<List<int>> Bejarat(int SOR, int OSZLOP, char[,] terkep)
@@ -197,15 +257,44 @@ namespace Project_feladat
             return kincs;
         }
 
-        static void KarakterMozgas(char[,] terkep, Dictionary<char, List<string>> mozgasIranyok, bool[] beallitasok)
+        static void KarakterMozgas(char[,] terkep, Dictionary<char, List<string>> mozgasIranyok, string[] beallitasokTomb)
         {
+            string[] beallitasokBool = new string[3] { beallitasokTomb[beallitasokTomb.Count() - 1].Split(',')[0], beallitasokTomb[beallitasokTomb.Count() - 1].Split(',')[1], beallitasokTomb[beallitasokTomb.Count() - 1].Split(',')[2] };
+            bool[] beallitasok = new bool[] { Convert.ToBoolean(beallitasokBool[0]), Convert.ToBoolean(beallitasokBool[1]), Convert.ToBoolean(beallitasokBool[2]) };
             List<List<int>> bejarat = Bejarat(terkep.GetLength(0), terkep.GetLength(1), terkep);
             List<int> karakter = new List<int>() { bejarat[1][0], bejarat[1][1] };
+            if (beallitasokTomb.Count() > 3)
+            {
+                karakter[0] = Convert.ToInt32(beallitasokTomb[1].Split(',')[0]);
+                karakter[1] = Convert.ToInt32(beallitasokTomb[1].Split(',')[1]);
+            }
             int lepesekSzama = 0;
             bool isJatek = true;
             List<List<int>> kincs = KincsesTerem(terkep);
             List<List<int>> megtalaltKincsek = new List<List<int>>();
+
+            if (beallitasokTomb.Count() > 3 && beallitasokTomb[2] != "")
+            {
+                List<int> jelenlegiKincs = new List<int>() {{0}, {0}};
+                foreach (string adatPar in beallitasokTomb[2].Remove(beallitasokTomb[2].Length - 1).Split(','))
+                {
+                    jelenlegiKincs[0] = Convert.ToInt32(adatPar.Split(':')[0]);
+                    jelenlegiKincs[1] = Convert.ToInt32(adatPar.Split(':')[1]);
+                    megtalaltKincsek.Add(jelenlegiKincs);
+                }
+            }
+
             char[,] bejartUt = new char[terkep.GetLength(0), terkep.GetLength(1)];
+
+            if (Convert.ToBoolean(beallitasokBool[0]) && beallitasokTomb.Count() > 3)
+            {
+                foreach (string vizsgaltPar in beallitasokTomb[3].Remove(beallitasokTomb[3].Count()-1).Split(','))
+                {
+                    bejartUt[Convert.ToInt32(vizsgaltPar.Split(':')[0]), Convert.ToInt32(vizsgaltPar.Split(':')[1])] = '.';
+                }
+            }
+
+
             while (isJatek)
             {
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -232,11 +321,11 @@ namespace Project_feladat
                         if (karakter[0] - 1 >= 0 && mozgasIranyok[terkep[karakter[0], karakter[1]]].Contains("fel") && mozgasIranyok[terkep[karakter[0] - 1, karakter[1]]].Contains("le"))
                         {
                             karakter[0] -= 1;
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
                             Console.SetCursorPosition(5 + karakter[1], 12 + karakter[0]);
                             Console.Write(terkep[karakter[0] + 1, karakter[1]]);
-                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.Red;
                             Console.SetCursorPosition(5 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1]]);
                             lepesekSzama++;
@@ -248,11 +337,11 @@ namespace Project_feladat
                         if (karakter[0] + 1 < terkep.GetLength(0) && mozgasIranyok[terkep[karakter[0], karakter[1]]].Contains("le") && mozgasIranyok[terkep[karakter[0] + 1, karakter[1]]].Contains("fel"))
                         {
                             karakter[0] += 1;
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
                             Console.SetCursorPosition(5 + karakter[1], 10 + karakter[0]);
                             Console.Write(terkep[karakter[0] - 1, karakter[1]]);
-                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.Red;
                             Console.SetCursorPosition(5 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1]]);
                             lepesekSzama++;
@@ -264,11 +353,11 @@ namespace Project_feladat
                         if (karakter[1] - 1 >= 0 && mozgasIranyok[terkep[karakter[0], karakter[1]]].Contains("balra") && mozgasIranyok[terkep[karakter[0], karakter[1] - 1]].Contains("jobbra"))
                         {
                             karakter[1] -= 1;
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
                             Console.SetCursorPosition(6 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1] + 1]);
-                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.Red;
                             Console.SetCursorPosition(5 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1]]);
                             lepesekSzama++;
@@ -280,11 +369,11 @@ namespace Project_feladat
                         if (karakter[1] + 1 < terkep.GetLength(1) && mozgasIranyok[terkep[karakter[0], karakter[1]]].Contains("jobbra") && mozgasIranyok[terkep[karakter[0], karakter[1] + 1]].Contains("balra"))
                         {
                             karakter[1] += 1;
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.DarkGray;
                             Console.SetCursorPosition(4 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1] - 1]);
-                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.BackgroundColor = ConsoleColor.Red;
                             Console.SetCursorPosition(5 + karakter[1], 11 + karakter[0]);
                             Console.Write(terkep[karakter[0], karakter[1]]);
                             lepesekSzama++;
@@ -307,9 +396,9 @@ namespace Project_feladat
 
                         foreach (List<int> vizsgaltKincs in megtalaltKincsek)
                         {
-                            mentesek += $"{Convert.ToString(vizsgaltKincs[0])}:{mentesek += Convert.ToString(vizsgaltKincs[1])},";
+                            mentesek += $"{Convert.ToString(vizsgaltKincs[0])}:{Convert.ToString(vizsgaltKincs[1])},";
                         }
-
+                        mentesek += ";";
                         if (beallitasok[0])
                         {
                             for (int sor = 0; sor < bejartUt.GetLength(0); sor++)
@@ -329,8 +418,7 @@ namespace Project_feladat
                         {
                             mentesek += $"{Convert.ToString(beallitas)},";
                         }
-                        //_ = Mentes(mentesek);
-
+                        Mentes(mentesek);
                         break;
 
                     case 'e':
@@ -399,17 +487,35 @@ namespace Project_feladat
             }
         }
 
-        //public static async Task Mentes(string adatok)
-        //{
-           // string mentesHelye = AppDomain.CurrentDomain.BaseDirectory;
-            //mentesHelye += "mentes\\mentes.SAV";
-           // if (!File.Exists(mentesHelye))
-           // {
-           //     File.Create(mentesHelye);
-          //  }
-          //  var a = File.WriteAllTextAsync(mentesHelye, adatok);
-        //}
+        static void Mentes(string adatok)
+        {
+            string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "mentes";
+            if (!Directory.Exists(mentesHelye))
+            {
+                Directory.CreateDirectory(mentesHelye);
+            }
 
+            mentesHelye += "\\mentes.SAV";
+            File.Delete(mentesHelye);
+            StreamWriter fajlbaIras = new StreamWriter(mentesHelye, false, Encoding.UTF8);
+
+            fajlbaIras.Write(adatok);
+            fajlbaIras.Close();
+        }
+
+        static bool MentesEllenorzese()
+        {
+            string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "\\mentes\\mentes.SAV";
+            bool vanMentes = File.Exists(mentesHelye);
+            return vanMentes;
+        }
+
+        static string MentesBetoltese()
+        {
+
+            string readText = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "mentes\\mentes.SAV");
+            return readText;
+        }
 
         static void IdoMutat()
         {
@@ -452,7 +558,7 @@ namespace Project_feladat
 
         static void IranyitasMegjelenites()
         {
-
+            Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.SetCursorPosition(2, 0);
             Console.Write("Mozgás: w, a, s, d");
@@ -463,8 +569,9 @@ namespace Project_feladat
 
         }
 
-        static void Jatek(bool[] beallitasok)
+        static void Jatek(string beallitasok)
         {
+            string[] felbontottBeallitasok = beallitasok.Split(';');
             Dictionary<char, List<string>> mozgasIranyok = new Dictionary<char, List<string>>()
             {
                 { '║', new List<string> { "fel", "le" } },
@@ -481,21 +588,24 @@ namespace Project_feladat
                 { '█', new List<string> { "fel", "le", "jobbra", "balra" } },
                 { '.', new List<string> { } }
             };
-
-            bool rejtettTerkep = beallitasok[0];
-            bool visszaSzamlalas = beallitasok[1];
+            string[] elsoKetBeallitas = new string[] {felbontottBeallitasok[felbontottBeallitasok.Count() - 1].Split(',')[0], felbontottBeallitasok[felbontottBeallitasok.Count() - 1].Split(',')[1] };
+            bool rejtettTerkep = Convert.ToBoolean(elsoKetBeallitas[0]);
+            bool visszaSzamlalas = Convert.ToBoolean(elsoKetBeallitas[1]);
             Thread idoMutatas = new Thread(IdoMutat);
-            char[,] terkep = Beolvas();
-            int SOR = terkep.GetLength(0);
-            int OSZLOP = terkep.GetLength(1);
-            Console.Clear();
+
+                char[,] terkep = Beolvas(felbontottBeallitasok);
+
             if (!rejtettTerkep)
             {
-                MegjelenitJatek(SOR, OSZLOP, terkep);
+                MegjelenitJatek(terkep.GetLength(0), terkep.GetLength(1), terkep, felbontottBeallitasok);
             }
             else
             {
-                MegjelenitKeret(SOR, OSZLOP);
+                MegjelenitKeret(terkep.GetLength(0), terkep.GetLength(1));
+                if (felbontottBeallitasok.Length > 3)
+                {
+                    MegjelenitVakterkep(terkep.GetLength(0), terkep.GetLength(1), terkep, felbontottBeallitasok);
+                }
             }
 
             IranyitasMegjelenites();
@@ -505,19 +615,13 @@ namespace Project_feladat
                 idoMutatas.Start();
             }
 
-            KarakterMozgas(terkep, mozgasIranyok, beallitasok);
+            KarakterMozgas(terkep, mozgasIranyok, felbontottBeallitasok);
             idoMutatas.Interrupt();
         }
 
-        static bool MentesEllenorzese()
+        static int Kezdolap() 
         {
-            string mentesHelye = AppDomain.CurrentDomain.BaseDirectory + "\\mentes";
-            bool vanMentes = File.Exists(mentesHelye);
-            return vanMentes;
-        }
-        static int Kezdolap()
-        {
-            string[] gombok = new string[] { "Folytatás", "Új játék", "Beállítások" };
+            string[] gombok = new string[] { "Folytatás", "Új játék", "Beállítások"};
             int valasztottKep = 1;
             char bekeres = ' ';
             while (bekeres != 'e' && bekeres != '\r')
@@ -532,12 +636,12 @@ namespace Project_feladat
                 {
                     if (gombIndex == valasztottKep)
                     {
-                        Console.SetCursorPosition(1, 4 + gombIndex * 2);
+                        Console.SetCursorPosition(1, 4 + gombIndex*2);
                         Console.WriteLine($"--> {gombok[gombIndex]} <--\n");
                     }
                     else
                     {
-                        Console.SetCursorPosition(4, 4 + gombIndex * 2);
+                        Console.SetCursorPosition(4, 4 + gombIndex*2);
                         Console.WriteLine(gombok[gombIndex]);
                     }
 
@@ -546,6 +650,10 @@ namespace Project_feladat
                 if (!MentesEllenorzese())
                 {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
                 }
                 if (valasztottKep == 0)
                 {
@@ -577,12 +685,12 @@ namespace Project_feladat
         static bool[] Beallitasok(bool[] beallitasok)
         {
 
-            string[] gombok = new string[] { "Vaktérkép", "Visszaszámláló", "teszt", "vissza" };
+            string[] gombok = new string[] { "Vaktérkép", "Visszaszámláló", "nyelv", "vissza" };
             int valasztottKep = 1;
             char bekeres = ' ';
             while (bekeres != 'e' && bekeres != '\r' || valasztottKep < 3)
             {
-                Console.SetCursorPosition(4, 1);
+                Console.SetCursorPosition(4, 1); 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("LABIRINTUS");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -628,12 +736,12 @@ namespace Project_feladat
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write($"\n{"Vissza",17}");
+                        Console.Write($"\n{"Vissza", 17}");
                         if (valasztottKep == 3)
                         {
                             Console.Write(" <--");
                         }
-                    }
+                    } 
 
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("");
@@ -675,26 +783,33 @@ namespace Project_feladat
 
         static void JatekProgram()
         {
-            bool[] beallitasok = new bool[3] { false, false, false };
-            int valasztottKep = 0;
+            bool[] beallitasok = new bool[3] {false, false, false};
+            int valasztottKep = 3;
             while (true)
             {
                 if (valasztottKep == 0)
                 {
-                    valasztottKep = Kezdolap();
+                    Jatek(MentesBetoltese());
                 }
 
                 if (valasztottKep == 1)
                 {
+                    string adatok = $"{Convert.ToString(beallitasok[0])},{Convert.ToString(beallitasok[1])},{Convert.ToString(beallitasok[2])}";
                     Console.Clear();
-                    Jatek(beallitasok);
-                    Console.Read();
+                    Jatek(adatok);
+                    Thread.Sleep(5000);
+                    valasztottKep = 3;
                 }
 
                 if (valasztottKep == 2)
                 {
                     beallitasok = Beallitasok(beallitasok);
-                    valasztottKep = 0;
+                    valasztottKep = 3;
+                }
+
+                if (valasztottKep == 3)
+                {
+                    valasztottKep = Kezdolap();
                 }
             }
         }
