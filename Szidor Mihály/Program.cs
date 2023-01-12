@@ -73,7 +73,7 @@ namespace Project_feladat
         static void MegjelenitJatek(int sor, int oszlop, char[,] terkep, string[] beallitasok)
         {
             List<List<int>> bejarat = Bejarat(terkep.GetLength(0), terkep.GetLength(1), terkep);
-            List<int> karakter = bejarat[1];
+            List<int> karakter = bejarat[0];
             if (beallitasok.Length > 3)
             {
                 karakter[0] = Convert.ToInt32(beallitasok[1].Split(',')[0]);
